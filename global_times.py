@@ -1,5 +1,3 @@
-#this is a fuckup
-
 ### (I) import
 import time
 from random import randint
