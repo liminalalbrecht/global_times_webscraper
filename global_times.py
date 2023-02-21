@@ -1,5 +1,3 @@
-#fuckup#1
-#fuckup#2
 ### (I) import
 import time
 from random import randint
