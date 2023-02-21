@@ -198,7 +198,7 @@ df_global_times['Author(s)'] = df_global_times['Author(s)'].apply(split_string).
 
 ### (V) save as excel
 from datetime import date
-df_global_times.to_excel(f'Global_Times{date.today()}.xlsx', sheet_name='articles')
+df_global_times.to_excel(f'Global_Times_{date.today()}.xlsx', sheet_name='articles')
 
 
 
