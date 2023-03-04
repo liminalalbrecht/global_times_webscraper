@@ -8,10 +8,12 @@ desired_width = 200
 pd.set_option('display.width', desired_width)
 pd.set_option("display.max_columns", 5)
 from time import sleep
+import json
+import re
 
 
 
-### (II) Extracting links
+### (II) defining functions
 #get yml
 yml_links="""links:
     css: null
@@ -43,13 +45,107 @@ def search_global_times(title, page, body=''):
 
 
 
-#loop extractings links
+
+### (III) Ask user for input data
+#title search terms
+search_title = input("Please enter the search terms for the article title.")
+print(f"Your title search term(s): '{search_title}'")
+print()
+
+#body search terms
+test = 0
+while test == 0:
+    decision_search_body = input("Do you also want to look for specific words in the body of Global Times articles? Answer 'yes' or 'no'.")
+    if "yes" in decision_search_body.lower():
+        search_body = input("Please enter the search terms for the article body.")
+        print(f"Your body search term(s) are: '{search_body}'")
+        test = 1
+    elif "no" in decision_search_body.lower():
+        search_body = ""
+        print(f"You chose no criteria for the text body.")
+        test = 1
+    else:
+        print("There appears to be a typo. Please type in either 'yes' or 'no'")
+
+print()
+#testing return of results and extracting page number if there are results
+#get yml
+page_number_yml="""Number_of_Pages:
+    css: 'div.row-fluid:nth-of-type(12)'
+    xpath: null
+    type: Text"""
+
+no_content_yml="""no_results_text:
+    css: 'div.container-fluid div'
+    xpath: null
+    type: Text"""
+
+article_numbers="""number_of_articles:
+    css: 'div.container-fluid div.row-fluid:nth-of-type(4)'
+    xpath: null
+    type: Text"""
+
+article_numbers_many = """articles_many:
+    css: 'div.row-fluid:nth-of-type(12)'
+    xpath: null
+    type: Text"""
+
+results = search_global_times(search_title, 1, search_body)
+page_data=extract(page_number_yml,results)
+my_string = json.dumps(page_data)
+
+delay = randint(1, 4)
+sleep(delay)
+
+if my_string == '{"Number_of_Pages": null}':
+        try:
+            page_data=extract(no_content_yml,results)
+            dumped_text = json.dumps(page_data)
+            if dumped_text == '{"no_results_text": "no results"}':
+                print("Your search did not yield any results.")
+                pages = 0
+                articles = 0
+            else:
+                page_data = extract(article_numbers, results)
+                dumped_article_num = json.dumps(page_data)
+                match = re.search(r'Total:(\d+)', dumped_article_num)
+
+                if match:
+                    articles = int(match.group(1))
+                pages = 1
+        except:
+            print("There seems to be an issue.")
+else:
+    match = re.search(r"(\d+) Next", my_string)
+    if match:
+    num_before_next = match.group(1)
+    pages = num_before_next
+
+    page_data = extract(article_numbers_many, results)
+    dumped_article_num = json.dumps(page_data)
+    match = re.search(r'Total:(\d+)', dumped_article_num)
+    if match:
+        articles = int(match.group(1))
+
+print()
+print(f"Number of pages: {pages}")
+print(f"Number of articles: {articles}")
+
+delay = randint(1, 4)
+sleep(delay)
+
+
+
+
+
+
+# #(IV) loop extractings links
 rounds = 1
 link_list = list()
 
-for i in range(1, 3):
-    print(f"Round{rounds} of Link-Loop")
-    results = search_global_times('European Union', i)
+for i in range(1, (pages + 1)):
+    print(f"Round {rounds} of Link-Loop")
+    results = search_global_times(search_title, i, search_body)
     links=extract(yml_links,results)
     #print(links)
     link_list.extend(links["links"])
@@ -74,7 +170,7 @@ else:
 
 
 
-### (III) extract articles content
+### (V) extract articles content
 
 #yml for each article content
 yml_articles = """title:
