@@ -143,7 +143,7 @@ sleep(delay)
 rounds = 1
 link_list = list()
 
-for i in range(1, (pages + 1)):
+for i in range(1, (int(pages) + 1)):
     print(f"Round {rounds} of Link-Loop")
     results = search_global_times(search_title, i, search_body)
     links=extract(yml_links,results)
