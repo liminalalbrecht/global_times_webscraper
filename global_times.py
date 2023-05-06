@@ -10,6 +10,8 @@ pd.set_option("display.max_columns", 5)
 from time import sleep
 import json
 import re
+from dateutil.parser import parse
+
 
 
 
@@ -36,8 +38,8 @@ def search_global_times(title, page, body=''):
                'author': '',
                'source': '',
                'textPage': body,
-               'begin_date': '',
-               'end_date': '',
+               'begin_date': formatted_date_start,
+               'end_date': formatted_date_end,
                'orderByTime': 'yes'}
 
     r = requests.post(url, data=payload)
@@ -68,6 +70,40 @@ while test == 0:
         print("There appears to be a typo. Please type in either 'yes' or 'no'")
 
 print()
+
+###user date input
+date_start = input("Please enter the start date (write in English) of the time period you want to analyze.")
+date_end = input("Please enter the end date of the time (write in English) period you want to analyze.")
+
+# Parse the date using dateutil
+date_start = parse(date_start)
+date_end = parse(date_end)
+
+# Format the date into year-month-date format
+formatted_date_start = date_start.strftime("%Y-%m-%d")
+formatted_date_end = date_end.strftime("%Y-%m-%d")
+
+# output the formatted date
+print(f"The chosen start date is: {formatted_date_start}")
+print(f"The chosen end date is: {formatted_date_end}")
+
+#checking date format
+# Define the pattern for YYYY-MM-DD format
+pattern = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+# Test if a string matches the pattern
+if pattern.match(formatted_date_start):
+    print("The string is in the correct format of YYYY-MM-DD.")
+else:
+    print("The string is not in the corrext format of YYYY-MM-DD. Please start process again and ")
+
+if pattern.match(formatted_date_end):
+    print("The string is in the correct format of YYYY-MM-DD.")
+else:
+    print("The string is not in the corrext format of YYYY-MM-DD. Please start process again and ")
+
+
+
 #testing return of results and extracting page number if there are results
 #get yml
 page_number_yml="""Number_of_Pages:
@@ -118,14 +154,14 @@ if my_string == '{"Number_of_Pages": null}':
 else:
     match = re.search(r"(\d+) Next", my_string)
     if match:
-    num_before_next = match.group(1)
-    pages = num_before_next
+        num_before_next = match.group(1)
+        pages = num_before_next
 
-    page_data = extract(article_numbers_many, results)
-    dumped_article_num = json.dumps(page_data)
-    match = re.search(r'Total:(\d+)', dumped_article_num)
-    if match:
-        articles = int(match.group(1))
+        page_data = extract(article_numbers_many, results)
+        dumped_article_num = json.dumps(page_data)
+        match = re.search(r'Total:(\d+)', dumped_article_num)
+        if match:
+            articles = int(match.group(1))
 
 print()
 print(f"Number of pages: {pages}")
@@ -295,6 +331,8 @@ df_global_times['Author(s)'] = df_global_times['Author(s)'].apply(split_string).
 ### (V) save as excel
 from datetime import date
 df_global_times.to_excel(f'Global_Times_{date.today()}.xlsx', sheet_name='articles')
+
+print("***SUCCESSFULLY FINISHED CODE***")
 
 
 
