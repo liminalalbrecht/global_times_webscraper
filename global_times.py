@@ -50,21 +50,26 @@ def search_global_times(title, page, body=''):
 
 ### (III) Ask user for input data
 #title search terms
-search_title = input("Please enter the search terms for the article title.")
-print(f"Your title search term(s): '{search_title}'")
+print()
+print("Please enter your search terms for the article title.")
+search_title = input()
+print(f"Your search term(s) for the title are: '{search_title}'")
 print()
 
 #body search terms
 test = 0
 while test == 0:
-    decision_search_body = input("Do you also want to look for specific words in the body of Global Times articles? Answer 'yes' or 'no'.")
+    print("Do you also want to look for specific words in the body of the articles?")
+    print("Answer 'yes' or 'no'.")
+    decision_search_body = input()
     if "yes" in decision_search_body.lower():
-        search_body = input("Please enter the search terms for the article body.")
+        print("Please enter the search terms for the article body.")
+        search_body = input()
         print(f"Your body search term(s) are: '{search_body}'")
         test = 1
     elif "no" in decision_search_body.lower():
         search_body = ""
-        print(f"You chose no criteria for the text body.")
+        print("You chose no criteria for the text body.")
         test = 1
     else:
         print("There appears to be a typo. Please type in either 'yes' or 'no'")
@@ -72,8 +77,14 @@ while test == 0:
 print()
 
 ###user date input
-date_start = input("Please enter the start date (write in English) of the time period you want to analyze.")
-date_end = input("Please enter the end date of the time (write in English) period you want to analyze.")
+print("Please enter the start date of the time period you want to scrape.")
+print("Required format is YYYY-MM-DD, but script will automatically transform other inputted date formats.")
+date_start = input()
+print()
+print("Please enter the end date of the time period you want to scrape.")
+print("Required format is YYYY-MM-DD, but script will automatically transform other inputted date formats.")
+date_end = input()
+print()
 
 # Parse the date using dateutil
 date_start = parse(date_start)
@@ -86,6 +97,7 @@ formatted_date_end = date_end.strftime("%Y-%m-%d")
 # output the formatted date
 print(f"The chosen start date is: {formatted_date_start}")
 print(f"The chosen end date is: {formatted_date_end}")
+print()
 
 #checking date format
 # Define the pattern for YYYY-MM-DD format
@@ -93,14 +105,14 @@ pattern = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Test if a string matches the pattern
 if pattern.match(formatted_date_start):
-    print("The string is in the correct format of YYYY-MM-DD.")
+    print("The string of the start_date is in the correct format of YYYY-MM-DD.")
 else:
-    print("The string is not in the corrext format of YYYY-MM-DD. Please start process again and ")
+    print("The string of the start_date is not in the corrext format of YYYY-MM-DD. Please start process again and adjust the date input")
 
 if pattern.match(formatted_date_end):
-    print("The string is in the correct format of YYYY-MM-DD.")
+    print("The string of the end_date is in the correct format of YYYY-MM-DD.")
 else:
-    print("The string is not in the corrext format of YYYY-MM-DD. Please start process again and ")
+    print("The string of the end_date is not in the correct format of YYYY-MM-DD. Please start process again and adjust the date input")
 
 
 
@@ -130,8 +142,8 @@ results = search_global_times(search_title, 1, search_body)
 page_data=extract(page_number_yml,results)
 my_string = json.dumps(page_data)
 
-delay = randint(1, 4)
-sleep(delay)
+#delay = randint(1, 2)
+#sleep(delay)
 
 if my_string == '{"Number_of_Pages": null}':
         try:
@@ -164,11 +176,12 @@ else:
             articles = int(match.group(1))
 
 print()
-print(f"Number of pages: {pages}")
-print(f"Number of articles: {articles}")
+print(f"Number of pages on website matching criteria: {pages}")
+print(f"Number of articles on website matching criteria: {articles}")
+print()
 
-delay = randint(1, 4)
-sleep(delay)
+#delay = randint(1, 2)
+#sleep(delay)
 
 
 
@@ -180,20 +193,21 @@ rounds = 1
 link_list = list()
 
 for i in range(1, (int(pages) + 1)):
-    print(f"Round {rounds} of Link-Loop")
+    print(f"Downloading Links: {rounds}/{pages}")
     results = search_global_times(search_title, i, search_body)
     links=extract(yml_links,results)
     #print(links)
     link_list.extend(links["links"])
 
     rounds = rounds + 1
-    delay = randint(1, 4)
-    sleep(delay)
-    print(f"Sleeping for {delay} s")
+    #delay = randint(1, 2)
+    #sleep(delay)
+    print()
 
 
-print(link_list)
-print(len(link_list))
+#print(link_list)
+print(f"Links: {len(link_list)} out of {articles} found articles.")
+print()
 
 #duplicate check
 if len(link_list) != len(set(link_list)):
@@ -259,7 +273,7 @@ round_number = 1
 
 for link in link_list:
 
-    print(f"Round {round_number} for Content-Loop")
+    print(f"Article {round_number}/{articles}")
 
     url = link
     r = requests.get(url)
@@ -277,9 +291,9 @@ for link in link_list:
 
     df_global_times.loc[length] = [published_a, author_a, title_a, body_a, url_of_a]
     round_number = round_number + 1
-    delay = randint(1, 4)
-    sleep(delay)
-    print(f"Sleeping system for {delay}s")
+    #delay = randint(1, 2)
+    #sleep(delay)
+    print()
 
 
 
@@ -302,9 +316,8 @@ def convert_timestamp_to_date_string(string):
     return formatted_date
 
 # Apply the function to the date column
-df_global_times['Published'] = df_global_times['Published'].apply(lambda x: convert_timestamp_to_date_string(x))
-df_global_times['Published'] = df_global_times['Published'].apply(lambda x: pd.to_datetime(x))
-
+df_global_times['Published'] = df_global_times['Published'].apply(lambda x: convert_timestamp_to_date_string(x) if x is not None else None)
+df_global_times['Published'] = df_global_times['Published'].apply(lambda x: pd.to_datetime(x) if x is not None else None)
 
 
 #clean author
@@ -324,8 +337,7 @@ def split_string(s_list):
         output_list = output_list[0]
     return output_list
 
-df_global_times['Author(s)'] = df_global_times['Author(s)'].apply(split_string).apply(pd.Series)
-
+df_global_times['Author(s)'] = df_global_times['Author(s)'].apply(lambda x: split_string(x) if x is not None else None).apply(pd.Series, dtype='object')
 
 
 ### (V) save as excel
