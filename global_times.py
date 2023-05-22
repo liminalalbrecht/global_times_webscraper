@@ -105,12 +105,12 @@ pattern = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Test if a string matches the pattern
 if pattern.match(formatted_date_start):
-    print("The string of the start_date is in the correct format of YYYY-MM-DD.")
+    print()
 else:
     print("The string of the start_date is not in the corrext format of YYYY-MM-DD. Please start process again and adjust the date input")
 
 if pattern.match(formatted_date_end):
-    print("The string of the end_date is in the correct format of YYYY-MM-DD.")
+    print()
 else:
     print("The string of the end_date is not in the correct format of YYYY-MM-DD. Please start process again and adjust the date input")
 
@@ -197,6 +197,8 @@ for i in range(1, (int(pages) + 1)):
     results = search_global_times(search_title, i, search_body)
     links=extract(yml_links,results)
     #print(links)
+    #if links is not None:
+        #link_list.extend(links["links"])
     link_list.extend(links["links"])
 
     rounds = rounds + 1
@@ -243,20 +245,13 @@ body_text:
 """
 
 #data table
-text_article = []
-link = []
-title = []
-author = []
-date = []
-
-dictionary_yt = {
-    "Published": date,
-    "Author(s)": author,
-    "Title": title,
-    "Text": text_article,
-    "Link": link}
-
-df_global_times = pd.DataFrame(dictionary_yt)
+df_global_times = pd.DataFrame({
+    "Published": [],
+    "Author(s)": [],
+    "Title": [],
+    "Text": [],
+    "Link": []
+})
 
 
 
