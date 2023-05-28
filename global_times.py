@@ -51,7 +51,7 @@ def search_global_times(title, page, body=''):
 ### (III) Ask user for input data
 #title search terms
 print()
-print("Please enter your search terms for the article title.")
+print("Please enter your search terms for the article title. Otherwise press enter.")
 search_title = input()
 print(f"Your search term(s) for the title are: '{search_title}'")
 print()
@@ -59,7 +59,7 @@ print()
 #body search terms
 test = 0
 while test == 0:
-    print("Do you also want to look for specific words in the body of the articles?")
+    print("Do you want to look for specific words in the body of the articles?")
     print("Answer 'yes' or 'no'.")
     decision_search_body = input()
     if "yes" in decision_search_body.lower():
@@ -180,8 +180,7 @@ print(f"Number of pages on website matching criteria: {pages}")
 print(f"Number of articles on website matching criteria: {articles}")
 print()
 
-#delay = randint(1, 2)
-#sleep(delay)
+sleep(3)
 
 
 
