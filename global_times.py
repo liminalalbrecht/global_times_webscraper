@@ -51,7 +51,7 @@ def search_global_times(title, page, body=''):
 ### (III) Ask user for input data
 #title search terms
 print()
-print("Please enter your search terms for the article title. If you only want to search in the article body, press Enter.")
+print("Please enter your search terms the article title shall contain. If you only want to search in the article body, press Enter.")
 search_title = input()
 print(f"Your search term(s) for the title are: '{search_title}'")
 print()
@@ -59,7 +59,7 @@ print()
 #body search terms
 test = 0
 while test == 0:
-    print("Do you want to look for specific words in the body of the articles?")
+    print("Do you want to look for specific words the text body of the articles shall contain?")
     print("Answer 'yes' or 'no'.")
     decision_search_body = input()
     if "yes" in decision_search_body.lower():
@@ -69,7 +69,7 @@ while test == 0:
         test = 1
     elif "no" in decision_search_body.lower():
         search_body = ""
-        print("You chose no criteria for the text body.")
+        print("You chose no search terms for the text body.")
         test = 1
     else:
         print("There appears to be a typo. Please type in either 'yes' or 'no'")
@@ -78,11 +78,11 @@ print()
 
 ###user date input
 print("Please enter the start date of the time period you want to scrape.")
-print("Required format is YYYY-MM-DD, but script will automatically transform other inputted date formats.")
+print("Required format is YYYY-MM-DD, but script will attempt to automatically transform other inputted date formats.")
 date_start = input()
 print()
 print("Please enter the end date of the time period you want to scrape.")
-print("Required format is YYYY-MM-DD, but script will automatically transform other inputted date formats.")
+print("Required format is YYYY-MM-DD, but script will attempt to automatically transform other inputted date formats.")
 date_end = input()
 print()
 
@@ -97,26 +97,22 @@ formatted_date_end = date_end.strftime("%Y-%m-%d")
 # output the formatted date
 print(f"The chosen start date is: {formatted_date_start}")
 print(f"The chosen end date is: {formatted_date_end}")
-print()
 
 #checking date format
 # Define the pattern for YYYY-MM-DD format
 pattern = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # Test if a string matches the pattern
-if pattern.match(formatted_date_start):
-    print()
-else:
+if not pattern.match(formatted_date_start):
     print("The string of the start_date is not in the corrext format of YYYY-MM-DD. Please start process again and adjust the date input")
 
-if pattern.match(formatted_date_end):
-    print()
-else:
+if not pattern.match(formatted_date_end):
     print("The string of the end_date is not in the correct format of YYYY-MM-DD. Please start process again and adjust the date input")
 
 
 
-#testing return of results and extracting page number if there are results
+
+###Return Results: Number of Pages and Articles
 #get yml
 page_number_yml="""Number_of_Pages:
     css: 'div.row-fluid:nth-of-type(12)'
@@ -128,16 +124,13 @@ no_content_yml="""no_results_text:
     xpath: null
     type: Text"""
 
-article_numbers="""number_of_articles:
-    css: null
-    xpath: '/html/body/div[4]/div[1]/div[3]/font'
-    type: Text"""
-
-
 article_numbers_many = """articles_many:
     css: 'div.row-fluid:nth-of-type(12)'
     xpath: null
     type: Text"""
+
+number_generator = 3
+
 
 results = search_global_times(search_title, 1, search_body)
 page_data=extract(page_number_yml,results)
@@ -145,7 +138,6 @@ my_string = json.dumps(page_data)
 
 #delay = randint(1, 2)
 #sleep(delay)
-
 if my_string == '{"Number_of_Pages": null}':
         try:
             page_data=extract(no_content_yml,results)
@@ -155,13 +147,20 @@ if my_string == '{"Number_of_Pages": null}':
                 pages = 0
                 articles = 0
             else:
-                page_data = extract(article_numbers, results)
-                dumped_article_num = json.dumps(page_data)
-                match = re.search(r'Total:(\d+)', dumped_article_num)
 
-                if match:
-                    articles = int(match.group(1))
-                pages = 1
+                while 'articles' not in locals() or pages != 1:
+                    article_numbers = f"""number_of_articles:
+                                   css: null
+                                   xpath: '/html/body/div[4]/div[1]/div[{number_generator}]/font'
+                                   type: Text"""
+                    page_data = extract(article_numbers, results)
+                    dumped_article_num = json.dumps(page_data)
+                    match = re.search(r'Total:(\d+)', dumped_article_num)
+                    number_generator = number_generator + 1
+                    if match:
+                        articles = int(match.group(1))
+                        pages = 1
+
         except:
             print("There seems to be an issue.")
 else:
@@ -212,11 +211,10 @@ for i in range(1, (int(pages) + 1)):
     rounds = rounds + 1
     #delay = randint(1, 2)
     #sleep(delay)
-    print()
 
 
 #print(link_list)
-print(f"Links: {len(link_list)} out of {articles} found articles.")
+print(f"Links: Obtained {len(link_list)} links out of {articles}.")
 print()
 
 #duplicate check
@@ -278,7 +276,7 @@ round_number = 1
 
 for link in link_list:
 
-    print(f"Article {round_number}/{articles}")
+    print(f"Downloading Articles: {round_number}/{articles}")
 
     url = link
     r = requests.get(url)
@@ -301,7 +299,9 @@ for link in link_list:
     #sleep(delay)
     print()
 
-
+print(f"Articles: Obtained {round_number - 1} articles ouf of {articles}.")
+print()
+print()
 
 ### (IV) clean data table
 df_global_times.dtypes
@@ -358,7 +358,8 @@ df_global_times = df_global_times.drop("Subtitle", axis=1)
 from datetime import date
 df_global_times.to_excel(f'Global_Times_{date.today()}.xlsx', sheet_name='articles')
 
-print("***SUCCESSFULLY FINISHED CODE***")
+print("****************************************************************************")
+print("Successfully finished code")
 
 
 
