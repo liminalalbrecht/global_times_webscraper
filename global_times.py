@@ -51,7 +51,7 @@ def search_global_times(title, page, body=''):
 ### (III) Ask user for input data
 #title search terms
 print()
-print("Please enter your search terms for the article title. Otherwise press enter.")
+print("Please enter your search terms for the article title. If you only want to search in the article body, press Enter.")
 search_title = input()
 print(f"Your search term(s) for the title are: '{search_title}'")
 print()
@@ -129,9 +129,10 @@ no_content_yml="""no_results_text:
     type: Text"""
 
 article_numbers="""number_of_articles:
-    css: 'div.container-fluid div.row-fluid:nth-of-type(4)'
-    xpath: null
+    css: null
+    xpath: '/html/body/div[4]/div[1]/div[3]/font'
     type: Text"""
+
 
 article_numbers_many = """articles_many:
     css: 'div.row-fluid:nth-of-type(12)'
@@ -175,13 +176,21 @@ else:
         if match:
             articles = int(match.group(1))
 
+
+# Check if 'pages' variable exists and assign 'unknown' if not
+if 'pages' not in locals():
+    pages = 'Unknown [Under repair]'
+
+# Check if 'articles' variable exists and assign 'unknown' if not
+if 'articles' not in locals():
+    articles = 'Unknown [Under repair]'
+
 print()
 print(f"Number of pages on website matching criteria: {pages}")
 print(f"Number of articles on website matching criteria: {articles}")
 print()
 
 sleep(3)
-
 
 
 
@@ -213,9 +222,6 @@ print()
 #duplicate check
 if len(link_list) != len(set(link_list)):
     print("There are duplicates in the list")
-else:
-    print("There are no duplicates in the list")
-
 
 
 
@@ -226,6 +232,10 @@ else:
 #yml for each article content
 yml_articles = """title:
     css: div.article_title
+    xpath: null
+    type: Text
+different_title:
+    css: div.article_subtitle
     xpath: null
     type: Text
 author:
@@ -246,8 +256,9 @@ body_text:
 #data table
 df_global_times = pd.DataFrame({
     "Published": [],
-    "Author(s)": [],
+    "Author": [],
     "Title": [],
+    "Subtitle": [],
     "Text": [],
     "Link": []
 })
@@ -276,14 +287,15 @@ for link in link_list:
 
     for key, value in text.items():
         title_a = list(text.values())[0]
-        author_a = list(text.values())[1]
-        published_a = list(text.values())[2]
-        body_a = list(text.values())[3]
+        subtitle_a = list(text.values())[1]
+        author_a = list(text.values())[2]
+        published_a = list(text.values())[3]
+        body_a = list(text.values())[4]
         url_of_a = url
 
     length = len(df_global_times)
 
-    df_global_times.loc[length] = [published_a, author_a, title_a, body_a, url_of_a]
+    df_global_times.loc[length] = [published_a, author_a, title_a, subtitle_a, body_a, url_of_a]
     round_number = round_number + 1
     #delay = randint(1, 2)
     #sleep(delay)
@@ -331,7 +343,15 @@ def split_string(s_list):
         output_list = output_list[0]
     return output_list
 
-df_global_times['Author(s)'] = df_global_times['Author(s)'].apply(lambda x: split_string(x) if x is not None else None).apply(pd.Series, dtype='object')
+df_global_times['Author'] = df_global_times['Author'].apply(lambda x: split_string(x) if x is not None else None).apply(pd.Series, dtype='object')
+
+
+
+###replace empty title with subtile
+mask = (df_global_times["Title"].isnull() | df_global_times["Title"].eq("")) & df_global_times["Subtitle"].notnull()
+df_global_times.loc[mask, "Title"] = df_global_times.loc[mask, "Subtitle"]
+df_global_times = df_global_times.drop("Subtitle", axis=1)
+
 
 
 ### (V) save as excel
