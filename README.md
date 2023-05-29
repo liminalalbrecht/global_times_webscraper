@@ -4,5 +4,7 @@ This webscraper was written by M. Albrecht Hänig, a social scientist focusing o
 PS: If you come across a bug, lemme know!
 
 Necessary Updates:
-  (1) For a small percentage of articles, the information for the authors is missing. Either the article does not have author names, or the author name is not in the usual format. In the latter case, I still need to write an update.
-  (2) Sometimes, the title is missing. Usually, this is due to the fact that the link leads to a video, with different title format.
+print("")
+(1) For a small percentage of articles, the information for the authors is missing. Either the article does not have author names, or the author name is not in the usual format. In the latter case, I still need to write an update.
+print("")
+(2) Sometimes, the title is missing. Usually, this is due to the fact that the link leads to a video, with different title format.
