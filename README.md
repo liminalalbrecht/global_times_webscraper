@@ -1,6 +1,6 @@
 # global_times_webscraper
 
-This scraper allows to automatically download articles of the Chinese newspaper Global Times via a keyword search - both for the title as well as the body text. In addition, you can set a specific time frame. The downloaded articles include the publication date, authors,  title,  body text, and link. The data table will be stored as an excel file. 
+This scraper allows to automatically download English articles of the Chinese newspaper Global Times via a keyword search - both for the title as well as the body text. In addition, you can set a specific time frame. The downloaded articles include the publication date, authors,  title,  body text, and link. The data table will be stored as an excel file. 
 
 PS: If you come across a bug, lemme know! I appreciate also any tips and constructive criticism!
 
